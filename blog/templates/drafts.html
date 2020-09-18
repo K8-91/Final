@@ -5,9 +5,9 @@
 <table class="table">
    <thead>
      <tr>
-       <th scope="col">Data</th>
-       <th scope="col">Tytuł</th>
-       <th scope="col">Treść</th>
+       <th scope="col">Date</th>
+       <th scope="col">Ttitle</th>
+       <th scope="col">Text</th>
        <th scope="col"></th>
      </tr>
    </thead>
@@ -23,6 +23,7 @@
            </a>
        </td>
        <td>{{ post.body|truncate(100, true) }}</td>
+         <td><form method="POST" action = "/delete-post/{{ post.id }}"><button type="submit" class="btn btn-danger">Delete</button></form></td>
      </tr>
      {% endfor %}
    </tbody>

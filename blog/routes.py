@@ -36,10 +36,11 @@ def exist_post(id=id):
     return render_template('update_form.html', form=get_post(), post=Entry.query.filter_by(id=id).first())
 
 @app.route('/delete-post/<int:id>', methods=["POST"])
+@login_required
 def delete_post(id=id):
     delete(id)
     return redirect((url_for("homepage")))
-    return render_template('delete.html', post=Entry.query.filter_by(id=id).first())
+   # return render_template('delete.html', post=Entry.query.filter_by(id=id).first())
 
 
 @app.route("/login/", methods=['GET', 'POST'])
