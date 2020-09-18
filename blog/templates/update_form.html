@@ -2,10 +2,10 @@
 
 {% block content %}
 <h3>
-   Add new post
+   Edit post
 </h3>
 
-<form action="/edit-post/" method="POST">
+<form action="/edit-post/{{ post.id }}" method="POST">
   {{form.hidden_tag()}}
    <div class="form-group">
        <label for="title">Title</label>

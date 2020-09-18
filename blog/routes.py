@@ -1,7 +1,7 @@
-from flask import Flask, request, redirect, url_for, render_template, flash
-from blog import app, db
+from flask import request, redirect, url_for, render_template
+from blog import app
 from blog.models import Entry
-from blog.forms import EntryForm
+from blog.base_functions import get_post, add_post
 
 @app.route('/')
 def homepage():
@@ -9,20 +9,23 @@ def homepage():
     return render_template("homepage.html", posts=posts)
 
 
-@app.route('/new-post', methods=["GET", "POST"])
-def create_entry():
-    form = EntryForm()
+@app.route('/edit-post/', methods=["GET", "POST"])
+def new_post():
+    get_post()
     if request.method == "POST":
-        if form.validate_on_submit():
-            new_post = Entry(title=form.data['title'], body=form.data['body'], is_published=form.data['is_published'])
-            db.session.add(new_post)
-            db.session.commit()
-            if form.data['is_published']:
-                flash('New post added!')
-            else:
-                flash('Required box not checked. Post not added.')
-        return redirect(url_for('homepage'))
-    return render_template("entry_form.html", form=form)
+        add_post()
+        return redirect((url_for("homepage")))
+    return render_template('entry_form.html', form=get_post())
+
+@app.route('/edit-post/<int:id>', methods=["GET", "POST"])
+def exist_post(id=id):
+    get_post(id)
+    if request.method == "POST":
+        add_post(id)
+        return redirect((url_for("homepage")))
+    return render_template('update_form.html', form=get_post(), post=Entry.query.filter_by(id=id).first())
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
