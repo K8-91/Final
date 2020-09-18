@@ -1,7 +1,9 @@
-from flask import request, redirect, url_for, render_template
+from flask import request, redirect, url_for, render_template, session, flash
 from blog import app
 from blog.models import Entry
+from blog.forms import LoginForm
 from blog.base_functions import get_post, add_post
+
 
 @app.route('/')
 def homepage():
@@ -17,6 +19,7 @@ def new_post():
         return redirect((url_for("homepage")))
     return render_template('entry_form.html', form=get_post())
 
+
 @app.route('/edit-post/<int:id>', methods=["GET", "POST"])
 def exist_post(id=id):
     get_post(id)
@@ -25,6 +28,29 @@ def exist_post(id=id):
         return redirect((url_for("homepage")))
     return render_template('update_form.html', form=get_post(), post=Entry.query.filter_by(id=id).first())
 
+
+@app.route("/login/", methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    errors = None
+    next_url = request.args.get('next')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            session['logged_in'] = True
+            session.permanent = True  # Use cookie to store session.
+            flash('You are now logged in.', 'success')
+            return redirect(next_url or url_for('homepage'))
+        else:
+            errors = form.errors
+    return render_template("login_form.html", form=form, errors=errors)
+
+
+@app.route('/logout/', methods=['GET', 'POST'])
+def logout():
+    if request.method == 'POST':
+        session.clear()
+        flash('You are now logged out.', 'success')
+    return redirect(url_for('homepage'))
 
 
 if __name__ == "__main__":
