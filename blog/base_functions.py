@@ -3,6 +3,13 @@ from blog.models import Entry
 from blog.forms import EntryForm
 from flask import flash
 
+def login_required(view_func):
+   @functools.wraps(view_func)
+   def check_permissions(*args, **kwargs):
+       if session.get('logged_in'):
+           return view_func(*args, **kwargs)
+       return redirect(url_for('login', next=request.path))
+   return check_permissions
 
 def get_post(id=None):
     if id:
@@ -38,3 +45,16 @@ def add_post(id=None):
         else:
             flash('Required box not checked. Post not added.')
     db.session.commit()
+
+def delete(id):
+    ids = []
+    posts = Entry.query.all()
+    for post in posts:
+        ids.append(post.id)
+    if id in ids:
+        post_to_delete = Entry.query.filter_by(id=id).first()
+        db.session.delete(post_to_delete)
+        db.session.commit()
+        flash(f'Post "{post_to_delete.title}" deleted!')
+    else:
+        flash('No post!')

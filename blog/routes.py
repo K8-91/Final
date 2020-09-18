@@ -2,7 +2,8 @@ from flask import request, redirect, url_for, render_template, session, flash
 from blog import app
 from blog.models import Entry
 from blog.forms import LoginForm
-from blog.base_functions import get_post, add_post
+from blog.base_functions import get_post, add_post, delete
+from blog.decorator import login_required
 
 
 @app.route('/')
@@ -10,8 +11,13 @@ def homepage():
     posts = Entry.query.filter_by(is_published=True).order_by(Entry.pub_date.desc())
     return render_template("homepage.html", posts=posts)
 
+@app.route('/draft-posts')
+def draft_posts():
+    drafts = Entry.query.filter_by(is_published=False).order_by(Entry.pub_date.desc())
+    return render_template("drafts.html", drafts=drafts)
 
 @app.route('/edit-post/', methods=["GET", "POST"])
+@login_required
 def new_post():
     get_post()
     if request.method == "POST":
@@ -21,12 +27,19 @@ def new_post():
 
 
 @app.route('/edit-post/<int:id>', methods=["GET", "POST"])
+@login_required
 def exist_post(id=id):
     get_post(id)
     if request.method == "POST":
         add_post(id)
         return redirect((url_for("homepage")))
     return render_template('update_form.html', form=get_post(), post=Entry.query.filter_by(id=id).first())
+
+@app.route('/delete-post/<int:id>', methods=["POST"])
+def delete_post(id=id):
+    delete(id)
+    return redirect((url_for("homepage")))
+    return render_template('delete.html', post=Entry.query.filter_by(id=id).first())
 
 
 @app.route("/login/", methods=['GET', 'POST'])
